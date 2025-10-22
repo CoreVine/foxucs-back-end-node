@@ -1,111 +1,56 @@
-const { Model, DataTypes } = require("sequelize");
-const bcrypt = require("bcryptjs");
+const { Model } = require('sequelize');
 
-class User extends Model {
-  static init(sequelize) {
-    super.init(
-      {
-        user_id: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          primaryKey: true,
-          autoIncrement: true
-        },
-        acc_type: {
-          type: DataTypes.ENUM('user'),  // Simplified to only allow 'user' type
-          allowNull: false,
-          defaultValue: 'user'
-        },
-        profile_picture_url: {
-          type: DataTypes.TEXT,
-          allowNull: true
-        },
-        name: {
-          type: DataTypes.STRING(70),
-          allowNull: false
-        },
-        username: {
-          type: DataTypes.STRING(255),
-          allowNull: false,
-          unique: true
-        },
-        email: {
-          type: DataTypes.STRING(255),
-          allowNull: false,
-          unique: true
-        },
-        email_verified: {
-          type: DataTypes.BOOLEAN,
-          allowNull: false,
-          defaultValue: false
-        },
-        password: DataTypes.VIRTUAL, // Virtual field that doesn't exist in the database
-        password_hash: {
-          type: DataTypes.STRING(255),
-          allowNull: false
-        },
-        phone_number: {
-          type: DataTypes.STRING(255),
-          allowNull: false
-        },
-        address: {
-          type: DataTypes.TEXT,
-          allowNull: false
-        }
-      },
-      {
-        sequelize,
-        modelName: 'User',
-        tableName: 'users',
-        timestamps: true,
-        createdAt: 'created_at',
-        updatedAt: 'updated_at'
-      }
-    );
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    static associate(models) {
+      this.hasOne(models.Profile, { foreignKey: 'user_id', as: 'profile', onDelete: 'CASCADE' });
+      this.hasMany(models.SocialLogin, { foreignKey: 'user_id', as: 'social_logins', onDelete: 'CASCADE' });
+      this.hasMany(models.BlueMark, { foreignKey: 'user_id', as: 'blue_marks', onDelete: 'CASCADE' });
+    }
 
-    // Password hashing hook
-    this.addHook("beforeSave", async (user) => {
-      if (user.password) {
-        user.password_hash = await bcrypt.hash(user.password, 8);
-      }
-    });
+    toJSON() {
+      const values = { ...this.get() };
+      delete values.password_hash;
+      return values;
+    }
 
-    return this;
+    isVerified() {
+      if (this.email && this.is_email_verified) return true;
+      if (this.phone_number && this.is_phone_verified) return true;
+      if (this.social_logins && this.social_logins.length) return true;
+      return false;
+    }
+
+    getLoginMethod() {
+      if (this.social_logins && this.social_logins.length) return this.social_logins[0].provider_type;
+      if (this.email && this.phone_number) return 'email_phone_password';
+      if (this.email) return 'email_password';
+      if (this.phone_number) return 'phone_password';
+      return 'unknown';
+    }
   }
 
-  // Model associations
-  static associate(models) {
-    /* 
-      Make sure models are made first before
-      adding associations!
-    */
-    // this.hasMany(models.Order, {
-    //   foreignKey: 'user_id',
-    //   as: 'orders',
-    //   onDelete: 'CASCADE'
-    // });
-    // this.hasMany(models.CustomerCar, {
-    //   foreignKey: 'customer_id',
-    //   as: 'cars',
-    //   onDelete: 'CASCADE'
-    // });
-    // this.hasMany(models.Rating, {
-    //   foreignKey: 'user_id',
-    //   as: 'ratings',
-    //   onDelete: 'CASCADE'
-    // });
-    // this.belongsToMany(models.Company, {
-    //   through: models.Employee,
-    //   foreignKey: 'user_id',
-    //   otherKey: 'company_id',
-    //   as: 'companies'
-    // });
-  }
+  User.init(
+    {
+      user_id: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
+      fullname: { type: DataTypes.STRING(255), allowNull: false },
+      email: { type: DataTypes.STRING(255), allowNull: true, unique: true },
+      phone_number: { type: DataTypes.STRING(20), allowNull: true, unique: true },
+      password_hash: { type: DataTypes.STRING(255), allowNull: false },
+      is_email_verified: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+      is_phone_verified: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+      blue_mark_status: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
+    },
+    {
+      sequelize,
+      modelName: 'User',
+      tableName: 'users',
+      underscored: true,
+      timestamps: true,
+      createdAt: 'created_at',
+      updatedAt: 'updated_at'
+    }
+  );
 
-  // Validate user password
-  checkPassword(password) {
-    return bcrypt.compare(password, this.password_hash);
-  }
-}
-
-module.exports = User;
-
+  return User;
+};
