@@ -1,106 +1,105 @@
+'use strict';
+
 const { Router } = require('express');
+const validate = require('../middlewares/validation.middleware');
+const Yup = require('yup');
 const authController = require('../controllers/auth.controller');
-const passwordResetController = require('../controllers/passwordReset.controller');
-const emailVerificationController = require('../controllers/emailVerification.controller');
-const authMiddleware = require('../middlewares/auth.middleware');
-const verifiedEmailRequired = require('../middlewares/verifiedEmailRequired.middleware');
-const validate = require("../middlewares/validation.middleware");
-const Yup = require("yup");
+
+const router = Router();
+
+/* Validation schemas */
+const initiateRegisterSchema = Yup.object().shape({
+  email: Yup.string().email(),
+  phone: Yup.string()
+}).test('email-or-phone', 'Either email or phone is required', value => {
+  if (!value.email && !value.phone) {
+    return false;
+  }
+  if (value.email) {
+    return Yup.string().email().isValidSync(value.email);
+  }
+  if (value.phone) {
+    return Yup.string().min(10).isValidSync(value.phone);
+  }
+  return true;
+});
+
+const completeRegisterSchema = Yup.object().shape({
+  sessionId: Yup.string().required(),
+  fullName: Yup.string().required(),
+  password: Yup.string().min(6).required(),
+  confirmPassword: Yup.string()
+    .required()
+    .oneOf([Yup.ref('password')], 'Passwords must match')
+});
+
+const verifySchema = Yup.object().shape({
+  code: Yup.string().required(),
+  email: Yup.string().email(),
+  phone: Yup.string()
+}).test('email-or-phone', 'Either email or phone is required', value => {
+  if (!value.email && !value.phone) {
+    return false;
+  }
+  if (value.email) {
+    return Yup.string().email().isValidSync(value.email);
+  }
+  if (value.phone) {
+    return Yup.string().min(10).isValidSync(value.phone);
+  }
+  return true;
+});
 
 const loginSchema = Yup.object().shape({
-  email: Yup.string().email().required(),
+  email: Yup.string().email(),
+  phone: Yup.string(),
   password: Yup.string().required()
+}).test('email-or-phone', 'Either email or phone is required', value => {
+  if (!value.email && !value.phone) {
+    return false;
+  }
+  if (value.email) {
+    return Yup.string().email().isValidSync(value.email);
+  }
+  if (value.phone) {
+    return Yup.string().min(10).isValidSync(value.phone);
+  }
+  return true;
 });
 
 const passwordResetRequestSchema = Yup.object().shape({
   email: Yup.string().email().required()
 });
 
-const verifyCodeSchema = Yup.object().shape({
-  email: Yup.string().email().required(),
-  code: Yup.string().length(6).required()
+const passwordResetSchema = Yup.object().shape({
+  resetToken: Yup.string().required(),
+  newPassword: Yup.string().min(6).required()
 });
 
-const resetPasswordSchema = Yup.object().shape({
-  email: Yup.string().email().required(),
-  password: Yup.string().min(6).required(),
-  resetToken: Yup.string().required()
+const socialRegisterSchema = Yup.object().shape({
+  provider_type: Yup.string().oneOf(['google', 'facebook', 'apple']).required(),
+  provider_token: Yup.string().required(),
+  email: Yup.string().email().nullable(),
+  firstName: Yup.string().nullable(),
+  lastName: Yup.string().nullable(),
+  username: Yup.string().nullable()
 });
 
-const emailVerificationSchema = Yup.object().shape({
-  email: Yup.string().email().required(),
-  code: Yup.string().length(6).required()
-});
+/* Endpoints */
+// Two-Step Registration
+router.post('/register/initiate', validate(initiateRegisterSchema), authController.initiateRegister);
+router.post('/register/verify', validate(verifySchema), authController.verifyRegistration);
+router.post('/register/complete', validate(completeRegisterSchema), authController.completeRegister);
+router.post('/register/resend-code', validate(initiateRegisterSchema), authController.resendVerificationCode);
 
-const authRoutes = Router();
+// // Authentication
+// router.post('/login', validate(loginSchema), authController.login);
 
-// Register routes - removing /api prefix since it's added globally in express.service.js
-authRoutes.post(
-  '/auth/register', 
-  authController.register
-);
+// // Password Reset
+// router.post('/password/reset/request', validate(passwordResetRequestSchema), authController.initiatePasswordReset);
+// router.post('/password/reset', validate(passwordResetSchema), authController.resetPassword);
 
-authRoutes.post(
-  '/auth/login', 
-  validate(loginSchema),
-  authController.login
-);
+// // Social Authentication
+// router.post('/social/register', validate(socialRegisterSchema), authController.registerBySocial);
 
-authRoutes.post(
-  '/auth/refresh',
-  verifiedEmailRequired,
-  authController.refreshToken
-);
-
-authRoutes.post(
-  '/auth/logout',
-  authController.logout
-);
-
-// Get current user - requires verified email
-authRoutes.get(
-  '/auth/me', 
-  authMiddleware, 
-  verifiedEmailRequired, 
-  authController.me
-);
-
-// Email verification routes
-authRoutes.post(
-  '/auth/email/verify',
-  validate(emailVerificationSchema),
-  emailVerificationController.verifyEmail
-);
-
-authRoutes.post(
-  '/auth/email/verify/resend',
-  validate(passwordResetRequestSchema), // Reuse existing schema since they're identical
-  emailVerificationController.resendVerificationCode
-);
-
-// Password reset routes
-authRoutes.post(
-  '/auth/password/request',
-  validate(passwordResetRequestSchema),
-  passwordResetController.requestVerificationCode
-);
-
-authRoutes.post(
-  '/auth/password/resend',
-  validate(passwordResetRequestSchema),
-  passwordResetController.resendVerificationCode
-);
-
-authRoutes.post(
-  '/auth/password/verify',
-  validate(verifyCodeSchema),
-  passwordResetController.verifyCode
-);
-
-authRoutes.post(
-  '/auth/password/reset',
-  validate(resetPasswordSchema),
-  passwordResetController.resetPassword
-);
-
-module.exports = authRoutes;
+module.exports = router;

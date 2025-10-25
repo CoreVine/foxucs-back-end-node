@@ -1,4 +1,4 @@
-const VerificationCodeModel = require('../../models/verificationCode');
+const db = require('../../models');
 const BaseRepository = require('../base.repository');
 const { Op } = require("sequelize");
 const crypto = require('crypto');
@@ -6,7 +6,7 @@ const { DatabaseError } = require('../../utils/errors/types/Sequelize.error');
 
 class VerificationCodeRepository extends BaseRepository {
   constructor() {
-    super(VerificationCodeModel);
+    super(db.VerificationCode);
   }
 
   /**
@@ -35,15 +35,17 @@ class VerificationCodeRepository extends BaseRepository {
    * @param {String} type - The verification type
    * @returns {Promise<Object>} The found verification code
    */
-  async findValidCode(email, code, type = 'password_reset') {
+  async findActiveCode({ email, phone, type, verified = false }) {
     try {
       return await this.model.findOne({
-        where: { 
-          email,
-          code,
+        where: {
+          ...(email ? { email } : {}),
+          ...(phone ? { phone } : {}),
           type,
+          verified,
           expires_at: { [Op.gt]: new Date() }
-        }
+        },
+        order: [['created_at', 'DESC']]
       });
     } catch (error) {
       throw new DatabaseError(error);
@@ -247,11 +249,95 @@ class VerificationCodeRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Mark a reset token as used and then delete it
-   * @param {Number} id - The verification code ID
-   * @returns {Promise<Object>} The deletion result
-   */
+/**
+ * Create registration verification code
+ * @param {Object} data - { email or phone, verify_type }
+ */
+async createRegistrationCode(data) {
+  try {
+    // Delete any existing unverified registration codes
+    await this.model.destroy({
+      where: {
+        ...(data.email ? { email: data.email } : {}),
+        ...(data.phone ? { phone: data.phone } : {}),
+        type: 'registration',
+        verify_type: data.verify_type,
+        verified: false
+      }
+    });
+
+    return await this.model.create({
+      ...data,
+      type: 'registration',
+      code: Math.floor(100000 + Math.random() * 900000).toString(),
+      expires_at: new Date(Date.now() + (30 * 60 * 1000)), // 30 minutes
+      attempt_count: 0
+    });
+  } catch (error) {
+    throw new DatabaseError(error);
+  }
+}
+/**
+ * Verify registration code
+ * @param {Object} data - { email or phone, code, verify_type }
+ */
+async verifyRegistrationCode(data) {
+  try {
+    const verificationCode = await this.model.findOne({
+      where: {
+        ...(data.email ? { email: data.email } : {}),
+        ...(data.phone ? { phone: data.phone } : {}),
+        code: data.code,
+        type: 'registration',
+        verify_type: data.verify_type,
+        verified: false,
+        expires_at: { [Op.gt]: new Date() },
+        attempt_count: { [Op.lt]: 5 }
+      }
+    });
+
+    if (!verificationCode) {
+      return null;
+    }
+
+    await verificationCode.update({
+      verified: true,
+      updated_at: new Date()
+    });
+
+    return verificationCode;
+  } catch (error) {
+    throw new DatabaseError(error);
+  }
+}
+
+/**
+ * Find existing active registration code
+ * @param {Object} data - { email or phone, verify_type }
+ */
+async findActiveRegistrationCode(data) {
+  try {
+    return await this.model.findOne({
+      where: {
+        ...(data.email ? { email: data.email } : {}),
+        ...(data.phone ? { phone: data.phone } : {}),
+        type: 'registration',
+        verify_type: data.verify_type,
+        verified: false,
+        expires_at: { [Op.gt]: new Date() },
+        attempt_count: { [Op.lt]: 5 }
+      }
+    });
+  } catch (error) {
+    throw new DatabaseError(error);
+  }
+}
+
+/**
+ * Mark a reset token as used and then delete it
+ * @param {Number} id - The verification code ID
+ * @returns {Promise<Object>} The deletion result
+ */
   async markUsedAndDelete(id) {
     try {
       // First mark as used (for tracking/audit purposes if needed)
@@ -270,4 +356,4 @@ class VerificationCodeRepository extends BaseRepository {
   }
 }
 
-module.exports = new VerificationCodeRepository();
+module.exports = VerificationCodeRepository;

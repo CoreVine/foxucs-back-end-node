@@ -1,11 +1,12 @@
-import { Sequelize } from "sequelize";
-import databaseConfig from "../config/database";
-import fs from "fs";
+const { Sequelize } = require("sequelize");
+const databaseConfig = require("../config/database");
+const fs = require("fs");
+const path = require("path");
 
 // The model files are loaded here
 const modelFiles = fs
-  .readdirSync(__dirname + "/../models/")
-  .filter((file) => file.endsWith(".js"));
+  .readdirSync(path.join(__dirname, "../models"))
+  .filter((file) => file !== 'index.js' && file.endsWith(".js"));
 
 const syncOptions = { force: process.env.SYNC_DB_FORCE === "true", alter: process.env.SYNC_DB_ALTER === "true" };
 
@@ -22,16 +23,29 @@ const sequelizeService = {
      
       // This is where models are initialized
       for (const file of modelFiles) {
-        const model = await import(`../models/${file}`);
+        const modelPath = path.join(__dirname, "../models", file);
+        const model = require(modelPath);
 
-        model.default.init(connection);
-        models.push(model.default);
+        // Handle both class-based and function-based models
+        if (model.prototype instanceof Sequelize.Model) {
+          // Class-based model
+          model.init(connection, Sequelize.DataTypes);
+          models.push(model);
+        } else if (typeof model === 'function') {
+          // Function-based model
+          const initializedModel = model(connection, Sequelize.DataTypes);
+          if (initializedModel && initializedModel.name) {
+            models.push(initializedModel);
+          }
+        }
       }
 
       // This is where associations are set up
-      for (const model of models) {
-        model.associate && model.associate(connection.models);
-      }
+      models.forEach(model => {
+        if (model.associate) {
+          model.associate(connection.models);
+        }
+      });
 
       console.log("[SEQUELIZE] Database service initialized");
       
@@ -62,4 +76,4 @@ const sequelizeService = {
   },
 };
 
-export default sequelizeService;
+module.exports = sequelizeService;

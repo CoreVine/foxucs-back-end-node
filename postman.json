@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "Express Sequelize API",
+    "name": "Authentication API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "12345678"
   },
@@ -9,7 +9,7 @@
       "name": "Authentication",
       "item": [
         {
-          "name": "Register",
+          "name": "Register with Email",
           "request": {
             "method": "POST",
             "header": [
@@ -20,18 +20,62 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"user@example.com\",\n    \"username\": \"testuser\",\n    \"name\": \"Test User\",\n    \"password\": \"password123\"\n}"
+              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"username\": \"johndoe\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/auth/register",
+              "raw": "{{base_url}}/register",
               "host": ["{{base_url}}"],
-              "path": ["auth", "register"]
+              "path": ["register"]
             },
-            "description": "Register a new user account"
+            "description": "Register a new user with email"
           }
         },
         {
-          "name": "Login",
+          "name": "Register with Phone",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"+1234567890\",\n    \"password\": \"password123\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"username\": \"johndoe\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/register",
+              "host": ["{{base_url}}"],
+              "path": ["register"]
+            },
+            "description": "Register a new user with phone number"
+          }
+        },
+        {
+          "name": "Verify Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"user@example.com\",\n    \"code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/verify",
+              "host": ["{{base_url}}"],
+              "path": ["verify"]
+            },
+            "description": "Verify account with verification code"
+          }
+        },
+        {
+          "name": "Login with Email",
           "event": [
             {
               "listen": "test",
@@ -40,9 +84,6 @@
                   "const jsonResponse = pm.response.json();",
                   "if (jsonResponse && jsonResponse.data && jsonResponse.data.token) {",
                   "    pm.globals.set('token', jsonResponse.data.token);",
-                  "}",
-                  "if (jsonResponse && jsonResponse.data && jsonResponse.data.refreshToken) {",
-                  "    pm.globals.set('refresh_token', jsonResponse.data.refreshToken);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -62,11 +103,47 @@
               "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/auth/login",
+              "raw": "{{base_url}}/login",
               "host": ["{{base_url}}"],
-              "path": ["auth", "login"]
+              "path": ["login"]
             },
-            "description": "Login with existing credentials"
+            "description": "Login with email and password"
+          }
+        },
+        {
+          "name": "Login with Phone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonResponse = pm.response.json();",
+                  "if (jsonResponse && jsonResponse.data && jsonResponse.data.token) {",
+                  "    pm.globals.set('token', jsonResponse.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"+1234567890\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            },
+            "description": "Login with phone and password"
           }
         },
         {
@@ -212,15 +289,15 @@
               "raw": "{\n    \"email\": \"user@example.com\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/auth/password/request",
+              "raw": "{{base_url}}/password/reset/request",
               "host": ["{{base_url}}"],
-              "path": ["auth", "password", "request"]
+              "path": ["password", "reset", "request"]
             },
-            "description": "Request a password reset verification code"
+            "description": "Request a password reset"
           }
         },
         {
-          "name": "Resend Password Reset Code",
+          "name": "Reset Password",
           "request": {
             "method": "POST",
             "header": [
@@ -231,26 +308,32 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"user@example.com\"\n}"
+              "raw": "{\n    \"resetToken\": \"your-reset-token\",\n    \"newPassword\": \"newpassword123\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/auth/password/resend",
+              "raw": "{{base_url}}/password/reset",
               "host": ["{{base_url}}"],
-              "path": ["auth", "password", "resend"]
+              "path": ["password", "reset"]
             },
-            "description": "Resend a password reset verification code"
+            "description": "Reset password with token"
           }
-        },
+        }
+      ],
+      "description": "Password reset-related endpoints"
+    },
+    {
+      "name": "Social Authentication",
+      "item": [
         {
-          "name": "Verify Password Reset Code",
+          "name": "Social Register/Login",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
                   "const jsonResponse = pm.response.json();",
-                  "if (jsonResponse && jsonResponse.data && jsonResponse.data.resetToken) {",
-                  "    pm.globals.set('reset_token', jsonResponse.data.resetToken);",
+                  "if (jsonResponse && jsonResponse.data && jsonResponse.data.token) {",
+                  "    pm.globals.set('token', jsonResponse.data.token);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -267,40 +350,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"user@example.com\",\n    \"code\": \"123456\"\n}"
+              "raw": "{\n    \"provider_type\": \"google\",\n    \"provider_token\": \"social-provider-token\",\n    \"email\": \"user@example.com\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"username\": \"johndoe\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/auth/password/verify",
+              "raw": "{{base_url}}/social/register",
               "host": ["{{base_url}}"],
-              "path": ["auth", "password", "verify"]
+              "path": ["social", "register"]
             },
-            "description": "Verify password reset code and get reset token"
-          }
-        },
-        {
-          "name": "Reset Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"newpassword123\",\n    \"resetToken\": \"{{reset_token}}\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/auth/password/reset",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "password", "reset"]
-            },
-            "description": "Reset password using verification token"
+            "description": "Register or login with a social provider"
           }
         }
       ],
-      "description": "Password reset-related endpoints"
+      "description": "Social authentication-related endpoints"
     }
   ],
   "event": [
@@ -326,7 +387,7 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:3000/api",
+      "value": "http://localhost:3000/api/auth",
       "type": "string"
     },
     {

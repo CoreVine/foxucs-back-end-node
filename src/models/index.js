@@ -26,7 +26,18 @@ fs.readdirSync(__dirname)
       return;
     }
 
-    const model = modelDef(sequelize, Sequelize.DataTypes);
+    let model;
+    
+    // Handle both class-based and function-based models
+    if (modelDef.prototype instanceof Sequelize.Model) {
+      // Class-based model
+      model = modelDef;
+      model.init(sequelize, Sequelize.DataTypes);
+    } else {
+      // Function-based model
+      model = modelDef(sequelize, Sequelize.DataTypes);
+    }
+
     if (!model || !model.name) {
       console.warn(`Skipping "${file}" — returned value is not a valid Sequelize model.`);
       return;

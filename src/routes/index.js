@@ -24,7 +24,11 @@ fs.readdirSync(__dirname)
   })
   .forEach(file => {
     const route = require(path.join(__dirname, file));
-    router.use(route);
+    if (file === 'auth.routes.js') {
+      router.use('/auth', route);
+    } else {
+      router.use(route);
+    }
   });
 
 module.exports = router;

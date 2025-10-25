@@ -72,8 +72,27 @@ const createPagination = (page, limit, totalItems) => {
   };
 };
 
+const success = (res, data = null, status = 200, message = 'Success') => {
+  const response = formatSuccessResponse(message, status, data);
+  return res.status(status).json(response);
+};
+
+const error = (res, message = 'Error', status = 400) => {
+  const response = formatErrorResponse(message, status);
+  return res.status(status).json(response);
+};
+
+const paginated = (res, data, page, limit, totalItems, status = 200, message = 'Success') => {
+  const pagination = createPagination(page, limit, totalItems);
+  const response = formatSuccessResponse(message, status, data, pagination);
+  return res.status(status).json(response);
+};
+
 module.exports = {
   formatSuccessResponse,
   formatErrorResponse,
-  createPagination
+  createPagination,
+  success,
+  error,
+  paginated
 };
