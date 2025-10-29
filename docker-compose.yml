@@ -12,8 +12,9 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
-      # host:container mapping changed to avoid colliding with an existing MySQL on the host
-      - "33060:3306"
+      # host:container mapping uses an environment variable so you can override
+      # at runtime with a free port (example: DB_HOST_PORT=33062 docker compose up -d)
+      - "${DB_HOST_PORT:-33060}:3306"
 
   app:
     build: .
