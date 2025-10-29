@@ -21,6 +21,11 @@ services:
     env_file: .env
     environment:
       NODE_ENV: production
+    # Allow container to reach the host machine using the special DNS name
+    # `host.docker.internal` (mapped to the host gateway). This lets the
+    # app container connect to a MySQL instance running on the Docker host.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "${SERVER_PORT:-4000}:${SERVER_PORT:-4000}"
     depends_on:
