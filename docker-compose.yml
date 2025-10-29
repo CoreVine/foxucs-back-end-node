@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: mysql:8.0
@@ -5,17 +7,14 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASS:-root}
       MYSQL_DATABASE: ${DB_NAME:-focus_db}
-      # Do NOT set MYSQL_USER to 'root' (official image rejects it).
-      # Use a non-root default user and password for the application.
-      MYSQL_USER: ${DB_USER:-focus_user}
+      MYSQL_USER: ${DB_USER:-root}
       MYSQL_PASSWORD: ${DB_PASS:-root}
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
       # host:container mapping uses an environment variable so you can override
       # at runtime with a free port (example: DB_HOST_PORT=33062 docker compose up -d)
-      # map host port (default 33062) to the container's MySQL port 3306
-      - "${DB_HOST_PORT:-33062}:3306"
+      - "${DB_HOST_PORT:-3002}:5506"
 
   app:
     build: .
@@ -23,18 +22,14 @@ services:
     env_file: .env
     environment:
       NODE_ENV: production
-      # When running the full compose stack the app should connect to the
-      # `db` service. If you want to use the MySQL instance on the host
-      # set DB_HOST=host.docker.internal in your .env (or override here).
-      DB_HOST: ${DB_HOST:-db}
-      DB_PORT: ${DB_PORT:-3306}
     # Allow container to reach the host machine using the special DNS name
     # `host.docker.internal` (mapped to the host gateway). This lets the
     # app container connect to a MySQL instance running on the Docker host.
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
-      - "${SERVER_PORT:-4000}:${SERVER_PORT:-4000}"
+      # Map host port 4001 to the container's SERVER_PORT (default 4001)
+      - "${SERVER_PORT:-4001}:${SERVER_PORT:-4001}"
     depends_on:
       - db
     volumes:
