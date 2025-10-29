@@ -14,7 +14,7 @@ services:
     ports:
       # host:container mapping uses an environment variable so you can override
       # at runtime with a free port (example: DB_HOST_PORT=33062 docker compose up -d)
-      - "${DB_HOST_PORT:-33060}:3306"
+      - "${DB_HOST_PORT:-3002}:5506"
 
   app:
     build: .
