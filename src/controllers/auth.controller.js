@@ -1,33 +1,35 @@
-'use strict';
+"use strict";
 
-const authService = require('../services/auth.service');
-const registrationSessionService = require('../services/registrationSession.service');
-const { ApiError } = require('../utils/errors');
-const responseHandler = require('../utils/responseHandler');
-const db = require('../models');
-const SocialLogin = db.SocialLogin;
+const authService = require("../services/auth.service");
+const registrationSessionService = require("../services/registrationSession.service");
+const { ApiError } = require("../utils/errors");
+const responseHandler = require("../utils/responseHandler");
+const SocialLoginRepository = require("../data-access/socialLogins");
 
 const authController = {
   async initiateRegister(req, res, next) {
     try {
       const { email, phone } = req.body;
-      const type = email ? 'email' : 'phone';
+      const type = email ? "email" : "phone";
       const contact = email || phone;
 
       // Start registration session
-      const sessionId = await registrationSessionService.createSession(contact, type);
+      const sessionId = await registrationSessionService.createSession(
+        contact,
+        type
+      );
 
       // Send verification code
       const result = await authService.sendVerificationCode({
         sessionId,
         type,
         contact,
-        purpose: 'registration'
+        purpose: "registration",
       });
 
       return responseHandler.success(res, {
         sessionId,
-        message: result.message
+        message: result.message,
       });
     } catch (error) {
       next(error);
@@ -37,23 +39,26 @@ const authController = {
   async resendVerificationCode(req, res, next) {
     try {
       const { email, phone } = req.body;
-      const type = email ? 'email' : 'phone';
+      const type = email ? "email" : "phone";
       const contact = email || phone;
 
       // Create new session for resend
-      const sessionId = await registrationSessionService.createSession(contact, type);
+      const sessionId = await registrationSessionService.createSession(
+        contact,
+        type
+      );
 
       // Resend verification code
       const result = await authService.sendVerificationCode({
         sessionId,
         type,
         contact,
-        purpose: 'registration'
+        purpose: "registration",
       });
 
       return responseHandler.success(res, {
         sessionId,
-        message: result.message
+        message: result.message,
       });
     } catch (error) {
       next(error);
@@ -63,7 +68,7 @@ const authController = {
   async verifyRegistration(req, res, next) {
     try {
       const { code, email, phone, sessionId } = req.body;
-      const type = email ? 'email' : 'phone';
+      const type = email ? "email" : "phone";
       const contact = email || phone;
 
       // Verify the code
@@ -72,15 +77,15 @@ const authController = {
         code,
         type,
         contact,
-        purpose: 'registration'
+        purpose: "registration",
       });
 
       // Mark session as verified
       await registrationSessionService.markAsVerified(sessionId);
 
       return responseHandler.success(res, {
-        message: 'Verification successful',
-        sessionId
+        message: "Verification successful",
+        sessionId,
       });
     } catch (error) {
       next(error);
@@ -93,9 +98,12 @@ const authController = {
 
       // Get session data
       const session = await registrationSessionService.getSession(sessionId);
-      
+
       if (!session.verified) {
-        throw new ApiError('Please verify your contact before completing registration', 400);
+        throw new ApiError(
+          "Please verify your contact before completing registration",
+          400
+        );
       }
 
       // Complete registration
@@ -104,7 +112,7 @@ const authController = {
         fullName,
         password,
         contact: session.contact,
-        type: session.type
+        type: session.type,
       });
 
       // Clean up session
@@ -121,7 +129,7 @@ const authController = {
       const { email, phone, password } = req.body;
 
       if (!password || (!email && !phone)) {
-        throw new ApiError('Email/phone and password are required', 400);
+        throw new ApiError("Email/phone and password are required", 400);
       }
 
       const result = await authService.login(email, phone, password);
@@ -136,7 +144,7 @@ const authController = {
       const { email } = req.body;
 
       if (!email) {
-        throw new ApiError('Email is required', 400);
+        throw new ApiError("Email is required", 400);
       }
 
       const result = await authService.initiatePasswordReset(email);
@@ -151,7 +159,7 @@ const authController = {
       const { resetToken, newPassword } = req.body;
 
       if (!resetToken || !newPassword) {
-        throw new ApiError('Reset token and new password are required', 400);
+        throw new ApiError("Reset token and new password are required", 400);
       }
 
       const result = await authService.resetPassword(resetToken, newPassword);
@@ -163,28 +171,36 @@ const authController = {
 
   async registerBySocial(req, res, next) {
     try {
-      const { provider_type, provider_token, email, firstName, lastName, username } = req.body;
-      
+      const {
+        provider_type,
+        provider_token,
+        email,
+        firstName,
+        lastName,
+        username,
+      } = req.body;
+
       if (!provider_type || !provider_token) {
-        throw new ApiError('Provider type and token are required', 400);
+        throw new ApiError("Provider type and token are required", 400);
       }
 
       const provider = provider_type.toLowerCase();
 
-      // Check for existing social login
-      const existingSocial = await SocialLogin.findOne({ 
-        where: { provider_token }, 
-        include: [{ model: db.User, as: 'user' }] 
-      });
+      // Check for existing social login via repository
+      const socialRepo = new SocialLoginRepository();
+      const existingSocial = await socialRepo.findByProviderToken(
+        provider_token
+      );
 
       if (existingSocial && existingSocial.user) {
         const user = existingSocial.user.toJSON();
-        delete user.password;
+        // remove sensitive info
+        delete user.password_hash;
         const result = await authService.createSession(user);
-        return responseHandler.success(res, { 
-          message: 'Social login successful',
+        return responseHandler.success(res, {
+          message: "Social login successful",
           user,
-          token: result.token 
+          token: result.token,
         });
       }
 
@@ -195,14 +211,14 @@ const authController = {
         lastName,
         username,
         provider_type: provider,
-        provider_token
+        provider_token,
       });
 
       return responseHandler.success(res, result, 201);
     } catch (error) {
       next(error);
     }
-  }
+  },
 };
 
 module.exports = authController;

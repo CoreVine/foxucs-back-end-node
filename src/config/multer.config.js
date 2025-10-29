@@ -1,10 +1,10 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const awsService = require('../services/aws.service');
+const awsService = require('../infrastructure/aws.service');
 const os = require('os');
 const { v4: uuidv4 } = require('uuid');
-const loggingService = require("../services/logging.service");
+const loggingService = require("../infrastructure/logging.service");
 const logger = loggingService.getLogger();
 
 

@@ -1,4 +1,4 @@
-const loggingService = require('../services/logging.service');
+const loggingService = require('../infrastructure/logging.service');
 const { isApiError } = require("../utils/errors/types/Api.error");
 
 const logger = loggingService.getLogger();

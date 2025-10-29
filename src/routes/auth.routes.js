@@ -92,8 +92,8 @@ router.post('/register/verify', validate(verifySchema), authController.verifyReg
 router.post('/register/complete', validate(completeRegisterSchema), authController.completeRegister);
 router.post('/register/resend-code', validate(initiateRegisterSchema), authController.resendVerificationCode);
 
-// // Authentication
-// router.post('/login', validate(loginSchema), authController.login);
+// Authentication
+router.post('/login', validate(loginSchema), authController.login);
 
 // // Password Reset
 // router.post('/password/reset/request', validate(passwordResetRequestSchema), authController.initiatePasswordReset);

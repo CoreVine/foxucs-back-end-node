@@ -1,47 +1,26 @@
-import {
-    NotFoundError,
-    BadRequestError,
-    ValidationError,
-    BadTokenError,
-    TokenExpiredError,
-    UnauthorizedError,
-    ForbiddenError,
-    InternalServerError,
-    CorsError,
-    VerificationCodeExpiredError,
-    VerificationCodeInvalidError,
-    PasswordResetRequiredError,
-    InvalidResetTokenError,
-    ResetTokenUsedError,
-    TooManyAttemptsError,
-    isApiError
-} from "./types/Api.error";
-
-import {
-    DatabaseError,
-    isDatabaseError
-} from "./types/Sequelize.error";
+const ApiErrors = require('./types/Api.error');
+const SequelizeErrors = require('./types/Sequelize.error');
 
 module.exports = {
     // API Errors
-    NotFoundError,
-    BadRequestError,
-    ValidationError,
-    BadTokenError,
-    TokenExpiredError,
-    UnauthorizedError,
-    ForbiddenError,
-    InternalServerError,
-    CorsError,
-    VerificationCodeExpiredError,
-    VerificationCodeInvalidError,
-    PasswordResetRequiredError,
-    InvalidResetTokenError,
-    ResetTokenUsedError,
-    TooManyAttemptsError,
+    NotFoundError: ApiErrors.NotFoundError,
+    BadRequestError: ApiErrors.BadRequestError,
+    ValidationError: ApiErrors.ValidationError,
+    BadTokenError: ApiErrors.BadTokenError,
+    TokenExpiredError: ApiErrors.TokenExpiredError,
+    UnauthorizedError: ApiErrors.UnauthorizedError,
+    ForbiddenError: ApiErrors.ForbiddenError,
+    InternalServerError: ApiErrors.InternalServerError,
+    CorsError: ApiErrors.CorsError,
+    VerificationCodeExpiredError: ApiErrors.VerificationCodeExpiredError,
+    VerificationCodeInvalidError: ApiErrors.VerificationCodeInvalidError,
+    PasswordResetRequiredError: ApiErrors.PasswordResetRequiredError,
+    InvalidResetTokenError: ApiErrors.InvalidResetTokenError,
+    ResetTokenUsedError: ApiErrors.ResetTokenUsedError,
+    TooManyAttemptsError: ApiErrors.TooManyAttemptsError,
     // Database Errors
-    DatabaseError,
+    DatabaseError: SequelizeErrors.DatabaseError,
     // Utils
-    isApiError,
-    isDatabaseError,
+    isApiError: ApiErrors.isApiError,
+    isDatabaseError: SequelizeErrors.isDatabaseError,
 };

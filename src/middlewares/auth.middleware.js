@@ -1,5 +1,5 @@
-const loggingService = require('../services/logging.service');
-const JwtService = require("../services/jwt.service");
+const loggingService = require('../infrastructure/logging.service');
+const JwtService = require("../infrastructure/jwt.service");
 const { BadTokenError } = require("../utils/errors/types/Api.error");
 
 const logger = loggingService.getLogger();

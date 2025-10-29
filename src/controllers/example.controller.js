@@ -1,5 +1,5 @@
 const { NotFoundError } = require('../utils/errors/types/Api.error');
-const loggingService = require('../services/logging.service');
+const loggingService = require('../infrastructure/logging.service');
 const { createPagination } = require('../utils/responseHandler');
 const logger = loggingService.getLogger();
 

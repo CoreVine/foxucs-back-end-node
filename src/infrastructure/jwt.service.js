@@ -1,8 +1,8 @@
-import * as crypto from 'crypto';
-import { BadTokenError } from '../utils/errors/types/Api.error';
+const crypto = require('crypto');
+const { BadTokenError } = require('../utils/errors/types/Api.error');
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
-const loggingService = require('../services/logging.service');
+const loggingService = require('./logging.service');
 const logger = loggingService.getLogger();
 
 

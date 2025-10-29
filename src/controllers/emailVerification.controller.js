@@ -1,7 +1,7 @@
 const UserRepository = require('../data-access/users');
 const VerificationCodeRepository = require('../data-access/verificationCodes');
-const emailService = require('../services/email.service');
-const loggingService = require('../services/logging.service');
+const emailService = require('../infrastructure/email.service');
+const loggingService = require('../infrastructure/logging.service');
 const { 
   NotFoundError, 
   VerificationCodeExpiredError,

@@ -1,14 +1,14 @@
-import DEFAULT_ERRORS from '../messages.errors';
-import BaseError from "./Base.error";
+const DEFAULT_ERRORS = require('../messages.errors');
+const BaseError = require('./Base.error');
 
 /**
  * @class DatabaseError
  */
-export class DatabaseError extends BaseError {
+class DatabaseError extends BaseError {
     constructor(originalError = null) {
-        const message = DEFAULT_ERRORS.DATABASE_ERROR.message,
-        status = 500,
-        type = DEFAULT_ERRORS.DATABASE_ERROR.code;
+        const message = DEFAULT_ERRORS.DATABASE_ERROR.message;
+        const status = 500;
+        const type = DEFAULT_ERRORS.DATABASE_ERROR.code;
 
         super(message, status, type, true);
         this.databaseError = true;
@@ -16,6 +16,10 @@ export class DatabaseError extends BaseError {
     }
 }
 
-export const isDatabaseError = (err) =>
-    err instanceof DatabaseError ? err.databaseError : false;
+const isDatabaseError = (err) => (err instanceof DatabaseError ? err.databaseError : false);
+
+module.exports = {
+    DatabaseError,
+    isDatabaseError,
+};
 

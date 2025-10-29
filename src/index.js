@@ -1,10 +1,9 @@
 const dotenv = require("dotenv");
-const expressService = require("./services/express.service");
-const sequelizeService = require("./services/sequelize.service");
-const awsService = require("./services/aws.service");
-const emailService = require("./services/email.service");
-const redisService = require("./services/redis.service");
-//const smsService = require("./services/sms.Service");
+const expressService = require("./infrastructure/express.service");
+const sequelizeService = require("./infrastructure/sequelize.service");
+const awsService = require("./infrastructure/aws.service");
+const emailService = require("./infrastructure/email.service");
+const redisService = require("./infrastructure/redis.service");
 dotenv.config();
 
 const services = [expressService, awsService, sequelizeService, emailService, redisService/*, smsService*/ ];
@@ -15,7 +14,7 @@ const services = [expressService, awsService, sequelizeService, emailService, re
       await service.init();
     }
     // Import logging service after initialization to avoid circular dependencies
-    const loggingService = require("./services/logging.service");
+    const loggingService = require("./infrastructure/logging.service");
     const logger = loggingService.getLogger();
     logger.info("Server initialized successfully");
     //PUT ADDITIONAL CODE HERE...

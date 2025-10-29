@@ -1,5 +1,5 @@
 const { ValidationError } = require("../utils/errors/types/Api.error");
-const loggingService = require("../services/logging.service");
+const loggingService = require("../infrastructure/logging.service");
 const logger = loggingService.getLogger();
 
 /**

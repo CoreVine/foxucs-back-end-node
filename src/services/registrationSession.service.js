@@ -1,6 +1,6 @@
 'use strict';
 
-const redisService = require('./redis.service');
+const redisService = require('../infrastructure/redis.service');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
 const crypto = require('crypto');
 
