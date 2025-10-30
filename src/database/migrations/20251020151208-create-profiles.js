@@ -5,8 +5,8 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.createTable('profiles', {
       user_id: {
-        // changed to match users.user_id which is INT UNSIGNED
-        type: Sequelize.INTEGER.UNSIGNED,
+        // must match users.user_id (UUID)
+        type: Sequelize.UUID,
         allowNull: false,
         primaryKey: true,
         references: { model: 'users', key: 'user_id' },
