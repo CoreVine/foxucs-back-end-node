@@ -24,7 +24,7 @@ router.get('/profile', authMiddleware, profileController.getProfile);
 // PUT to create/update profile
 // Order: auth -> multer -> validate -> presence check -> redundancy check -> controller
 {
-	const uploader = multerConfig.createUploader({ uploadPath: 'uploads/profile' });
+	const uploader = multerConfig.createUploader({ uploadPath: 'uploads/profile', fileFilter: 'images', maxFileSize: 2 * 1024 * 1024 }); // 2 MB
 	// Normalize uploader.single(...) to always be an array of middleware(s)
 	const uploadMiddlewareResult = uploader.single('profile_picture');
 	const uploadMiddlewares = Array.isArray(uploadMiddlewareResult)

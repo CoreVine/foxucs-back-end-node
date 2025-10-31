@@ -24,6 +24,17 @@ class AdminRepository {
     return db.Admin.findByPk(id, { include: [{ model: db.Role, as: 'roles' }] });
   }
 
+  async findAll() {
+    return db.Admin.findAll({ include: [{ model: db.Role, as: 'roles' }], order: [['created_at', 'DESC']] });
+  }
+
+  async delete(adminId) {
+    const admin = await db.Admin.findByPk(adminId);
+    if (!admin) return null;
+    await admin.destroy();
+    return admin;
+  }
+
   async assignRoles(adminId, roleIds) {
     const admin = await db.Admin.findByPk(adminId);
     if (!admin) return null;

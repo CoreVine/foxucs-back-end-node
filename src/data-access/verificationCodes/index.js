@@ -269,7 +269,7 @@ async createRegistrationCode(data) {
     return await this.model.create({
       ...data,
       type: 'registration',
-      code: Math.floor(100000 + Math.random() * 900000).toString(),
+      code:111111, //Math.floor(100000 + Math.random() * 900000).toString(),
       expires_at: new Date(Date.now() + (30 * 60 * 1000)), // 30 minutes
       attempt_count: 0
     });

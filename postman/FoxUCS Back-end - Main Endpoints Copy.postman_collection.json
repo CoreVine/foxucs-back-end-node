@@ -1,0 +1,714 @@
+{
+	"info": {
+		"_postman_id": "0ca69187-aafe-48aa-b1b1-52f81e908678",
+		"name": "FoxUCS Back-end - Main Endpoints Copy",
+		"description": "Collection covering auth, password reset, profile, and admin endpoints. Replace {{baseUrl}}, {{authToken}}, and {{adminToken}} with real values in your environment. Each request includes a short description, required headers, and example body where applicable.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45131942"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Password Reset",
+					"item": [
+						{
+							"name": "Request Reset",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"user@example.com\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/password-reset/request",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"password-reset",
+										"request"
+									]
+								},
+								"description": "Request a password reset token to be sent to the user's email. Body: { email: string }"
+							},
+										"response": [
+											{
+												"name": "Success",
+												"status": "200 OK",
+												"code": 200,
+												"_postman_previewlanguage": "json",
+												"body": "{\n  \"token\": \"<jwt_token>\",\n  \"user\": {\n    \"user_id\": 1,\n    \"email\": \"test@example.com\",\n    \"fullName\": \"Test User\"\n  }\n}"
+											}
+										]
+						},
+						{
+							"name": "Confirm Reset",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"token\": \"<reset-token>\",\n  \"new_password\": \"newpassword\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/password-reset/confirm",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"password-reset",
+										"confirm"
+									]
+								},
+								"description": "Confirm a password reset using the token previously issued. Body: { token: string, new_password: string }"
+							},
+									"response": [
+										{
+											"name": "Success",
+											"status": "200 OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"body": "{\n  \"sessionId\": \"<session-id>\",\n  \"message\": \"Verification successful, use sessionId to complete registration\"\n}"
+										}
+									]
+						}
+					]
+				},
+				{
+					"name": "register",
+					"item": [
+						{
+							"name": "email",
+							"item": [
+								{
+									"name": "1. Initiate Registration with Email",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"email\": \"test@example.com\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/auth/register/initiate",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"register",
+												"initiate"
+											]
+										},
+										"description": "Initiates the registration process using email"
+									},
+									"response": [
+										{
+											"name": "Success",
+											"status": "200 OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"body": "{\n  \"user_id\": 1,\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\",\n  \"email\": \"test@example.com\",\n  \"phone\": \"+1234567890\",\n  \"address\": null,\n  \"gender\": null,\n  \"birthdate\": null,\n  \"profile_picture_url\": null\n}"
+										}
+									]
+								},
+								{
+									"name": "2. Verify Registration Code",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"email\": \"ah250296@gmail.com\",\n    \"code\": \"548819\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/auth/register/verify",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"register",
+												"verify"
+											]
+										},
+										"description": "Verifies the registration code sent to email/phone"
+									},
+									"response": [
+										{
+											"name": "Success",
+											"status": "200 OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"body": "{\n  \"user_id\": 1,\n  \"first_name\": \"NewName\",\n  \"last_name\": \"NewLast\",\n  \"email\": \"test@example.com\",\n  \"profile_picture_url\": \"https://res.cloudinary.com/.../profile.jpg\"\n}"
+										}
+									]
+								},
+								{
+									"name": "3. Complete Registration",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"sessionId\": \"{{sessionId}}\",\n    \"fullName\": \"Test User\",\n    \"password\": \"password123\",\n    \"confirmPassword\": \"password123\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/auth/register/complete",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"register",
+												"complete"
+											]
+										},
+										"description": "Completes the registration process with user details"
+									},
+									"response": [
+										{
+											"name": "Success",
+											"status": "200 OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"body": "{\n  \"admin\": {\n    \"id\": 1,\n    \"username\": \"admin\",\n    \"email\": \"admin@example.com\"\n  },\n  \"token\": \"<admin_jwt>\"\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "phone",
+							"item": [
+								{
+									"name": "1. Initiate Registration with Phone",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"phone\": \"+1234567890\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/auth/register/initiate",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"register",
+												"initiate"
+											]
+										},
+										"description": "Initiates the registration process using phone number"
+									},
+										"response": [
+											{
+												"name": "Success",
+												"status": "200 OK",
+												"code": 200,
+												"_postman_previewlanguage": "json",
+												"body": "[\n  { \"id\": 1, \"name\": \"super_admin\", \"description\": \"Full access\" },\n  { \"id\": 2, \"name\": \"editor\", \"description\": \"Can edit content\" }\n]"
+											}
+										]
+								},
+								{
+									"name": "Resend Verification Code",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"email\": \"test@example.com\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/auth/register/resend-code",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"register",
+												"resend-code"
+											]
+										},
+										"description": "Resends the verification code"
+									},
+									"response": []
+								},
+								{
+									"name": "3. Complete Registration",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"sessionId\": \"{{sessionId}}\",\n    \"fullName\": \"Test User\",\n    \"password\": \"password123\",\n    \"confirmPassword\": \"password123\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/auth/register/complete",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"register",
+												"complete"
+											]
+										},
+										"description": "Completes the registration process with user details"
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "scoial",
+							"item": [
+								{
+									"name": "facebook",
+									"item": []
+								},
+								{
+									"name": "google",
+									"item": []
+								},
+								{
+									"name": "apple",
+									"item": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "login",
+					"item": [
+						{
+							"name": "email",
+							"item": [
+								{
+									"name": "Login with Email",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/auth/login",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										},
+										"description": "Log in using email (or phone) and password. Body: { email?: string, phone?: string, password: string }. Returns JWT access token and user info on success."
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "phone",
+							"item": [
+								{
+									"name": "Login with Phone",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"phone\": \"+1234567890\",\n    \"password\": \"password123\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/auth/login",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"auth",
+												"login"
+											]
+										},
+										"description": "Login using phone number and password"
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "scoial",
+							"item": [
+								{
+									"name": "facebook",
+									"item": []
+								},
+								{
+									"name": "google",
+									"item": []
+								},
+								{
+									"name": "apple",
+									"item": []
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Profile",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profile"
+							]
+						}
+						,
+						"description": "Returns the authenticated user's profile. Requires Authorization: Bearer {{authToken}}. Response includes profile fields like name, email, phone, address, gender, birthdate and profile_picture_url."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile (multipart)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "first_name",
+									"value": "NewName",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "NewLast",
+									"type": "text"
+								},
+								{
+									"key": "profile_picture",
+									"value": "",
+									"type": "file"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profile"
+							]
+						}
+						,
+						"description": "Create or update the authenticated user's profile. Requires Authorization header. Content-Type: multipart/form-data. Supported form fields: first_name, last_name, profile_picture (file), email, phone, address, gender (boolean), birthdate (YYYY-MM-DD). Returns the updated profile on success."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Auth",
+					"item": [
+						{
+							"name": "Admin Login",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"admin",
+										"login"
+									]
+								},
+								"description": "Admin login with email and password. Body: { email, password } or { username, password } depending on auth. Returns admin JWT token when successful."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "dashboard",
+					"item": []
+				},
+				{
+					"name": "settings",
+					"item": [
+						{
+							"name": "admin creation and roles",
+							"item": [
+								{
+									"name": "List Roles",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{adminToken}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/admin/roles",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"admin",
+												"roles"
+											]
+										},
+										"description": "List all roles available in the system. Requires Authorization: Bearer {{adminToken}} with a super_admin role."
+									},
+									"response": []
+								},
+								{
+									"name": "Get Admin Activity",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{adminToken}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/admin/activity",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"admin",
+												"activity"
+											]
+										},
+										"description": "Retrieve admin activity logs. Requires Authorization: Bearer {{adminToken}} and super_admin role. Supports paging via query params."
+									},
+									"response": []
+								},
+								{
+									"name": "Assign Role to Admin",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{adminToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"roleId\": 2\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/admin/{{adminId}}/roles",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"admin",
+												"{{adminId}}",
+												"roles"
+											]
+										},
+										"description": "Assign one or more role IDs to a specific admin. Body: { roleIds: [number] }. Requires super_admin authorization."
+									},
+									"response": []
+								},
+								{
+									"name": "Create Role",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{adminToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"name\": \"editor\",\n  \"description\": \"Editors can manage content\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/admin/roles",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"admin",
+												"roles"
+											]
+										},
+										"description": "Create a new role in the system. Body: { name: string, description: string }. Requires super_admin authorization."
+									},
+									"response": []
+								},
+								{
+									"name": "Create Admin",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{adminToken}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"username\": \"newadmin\",\n  \"email\": \"admin2@example.com\",\n  \"password\": \"supersecret\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/admin",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"admin"
+											]
+										},
+										"description": "Create a new admin user. Body: { username, email, password, profile_picture_url?, roleIds? }. Requires super_admin authorization. Returns created admin record."
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "adds",
+					"item": []
+				},
+				{
+					"name": "category",
+					"item": []
+				},
+				{
+					"name": "payments",
+					"item": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:4000"
+		},
+		{
+			"key": "authToken",
+			"value": ""
+		},
+		{
+			"key": "adminToken",
+			"value": ""
+		}
+	]
+}

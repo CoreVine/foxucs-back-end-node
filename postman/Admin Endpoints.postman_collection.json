@@ -1,0 +1,162 @@
+{
+  "info": {
+    "_postman_id": "admin-endpoints-collection",
+    "name": "FoxUCS - Admin Endpoints",
+    "description": "Postman collection for admin management endpoints (login, create/update/delete/list admins, roles). Use the `{{base_url}}` and `{{admin_token}}` variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Admin - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"superadmin@example.com\",\n  \"password\": \"yourpassword\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/admin/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "admin",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Admin - Create (with optional profile picture)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "username", "value": "newadmin", "type": "text" },
+            { "key": "email", "value": "newadmin@example.com", "type": "text" },
+            { "key": "password", "value": "secretpass", "type": "text" },
+            { "key": "roleIds", "value": "[1]", "type": "text", "description": "JSON array of role IDs" },
+            { "key": "profile_picture", "type": "file", "src": "" }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/admin",
+          "host": ["{{base_url}}"],
+          "path": ["admin"]
+        }
+      }
+    },
+    {
+      "name": "Admin - Assign Roles",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"roleIds\": [1,2]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/admin/:id/roles",
+          "host": ["{{base_url}}"],
+          "path": ["admin", ":id", "roles"]
+        }
+      }
+    },
+    {
+      "name": "Admin - Update (with optional profile picture)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "username", "value": "updatedadmin", "type": "text" },
+            { "key": "email", "value": "updated@example.com", "type": "text" },
+            { "key": "password", "value": "newpass", "type": "text" },
+            { "key": "roleIds", "value": "[1]", "type": "text" },
+            { "key": "profile_picture", "type": "file", "src": "" }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/admin/:id",
+          "host": ["{{base_url}}"],
+          "path": ["admin", ":id"]
+        }
+      }
+    },
+    {
+      "name": "Admin - Delete",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": { "raw": "{{base_url}}/admin/:id", "host": ["{{base_url}}"], "path": ["admin", ":id"] }
+      }
+    },
+    {
+      "name": "Admin - Me",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{admin_token}}" } ],
+        "url": { "raw": "{{base_url}}/admin/me", "host": ["{{base_url}}"], "path": ["admin","me"] }
+      }
+    },
+    {
+      "name": "Admin - Activity",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{admin_token}}" } ],
+        "url": { "raw": "{{base_url}}/admin/activity", "host": ["{{base_url}}"], "path": ["admin","activity"] }
+      }
+    },
+    {
+      "name": "Admin - List All Admins",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{admin_token}}" } ],
+        "url": { "raw": "{{base_url}}/admin/get-all-admins", "host": ["{{base_url}}"], "path": ["admin","get-all-admins"] }
+      }
+    },
+    {
+      "name": "Admin - List Roles",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{admin_token}}" } ],
+        "url": { "raw": "{{base_url}}/admin/roles", "host": ["{{base_url}}"], "path": ["admin","roles"] }
+      }
+    }
+  ]
+}

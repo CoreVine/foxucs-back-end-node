@@ -25,7 +25,9 @@ const validate = (schema, source = 'body') => {
         for (const [src, schemaObj] of Object.entries(schema)) {
           if (req[src]) {
             try {
-              await schemaObj.validate(req[src], { abortEarly: false });
+              // Validate and capture transformed value back into req[src]
+              const validated = await schemaObj.validate(req[src], { abortEarly: false });
+              req[src] = validated;
             } catch (error) {
               errors.push(...error.errors.map(err => `[${src}] ${err}`));
             }
@@ -40,7 +42,9 @@ const validate = (schema, source = 'body') => {
       // Handle single source validation (original functionality)
       else {
         try {
-          await schema.validate(req[source], { abortEarly: false });
+          // Validate and assign transformed value back to request source
+          const validated = await schema.validate(req[source], { abortEarly: false });
+          req[source] = validated;
         } catch (error) {
           // Create a structured array of validation errors
           const errors = error.errors || [error.message];

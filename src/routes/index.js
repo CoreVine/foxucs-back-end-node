@@ -24,10 +24,22 @@ fs.readdirSync(__dirname)
   })
   .forEach(file => {
     const route = require(path.join(__dirname, file));
-    if (file === 'auth.routes.js') {
+    // Some files in this directory may be commented-out or not export a Router.
+    // Ensure the required module is an express Router (or middleware function) before using it.
+    const isRouter = (r) => {
+      if (!r) return false;
+      if (typeof r === 'function') return true; // middleware or Router
+      if (typeof r === 'object' && (Array.isArray(r.stack) || typeof r.use === 'function')) return true;
+      return false;
+    };
+
+    if (file === 'auth.routes.js' && isRouter(route)) {
       router.use('/auth', route);
-    } else {
+    } else if (isRouter(route)) {
       router.use(route);
+    } else {
+      // skip non-router modules (e.g., commented-out route files)
+      // console.warn(`Skipping non-router file: ${file}`);
     }
   });
 
