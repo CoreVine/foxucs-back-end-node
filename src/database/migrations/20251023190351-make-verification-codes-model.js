@@ -64,18 +64,40 @@ module.exports = {
       }
     });
 
-    // Add indexes
+    // Add indexes (remove any existing conflicting indexes first to make this migration idempotent)
+    try {
+      await queryInterface.removeIndex('verification_codes', 'verification_code_email_type_idx');
+    } catch (err) {
+      // ignore if it doesn't exist
+    }
     await queryInterface.addIndex('verification_codes', ['email', 'type'], {
       name: 'verification_code_email_type_idx'
     });
+
+    try {
+      await queryInterface.removeIndex('verification_codes', 'verification_code_reset_token_idx');
+    } catch (err) {
+      // ignore if it doesn't exist
+    }
     await queryInterface.addIndex('verification_codes', ['reset_token'], {
       name: 'verification_code_reset_token_idx'
     });
+
+    try {
+      await queryInterface.removeIndex('verification_codes', 'verification_code_expires_at_idx');
+    } catch (err) {
+      // ignore if it doesn't exist
+    }
     await queryInterface.addIndex('verification_codes', ['expires_at'], {
       name: 'verification_code_expires_at_idx'
     });
 
-    // Add unique index for active verification codes
+    // Add unique index for active verification codes — remove existing if present
+    try {
+      await queryInterface.removeIndex('verification_codes', 'unique_active_verification');
+    } catch (err) {
+      // ignore if it doesn't exist
+    }
     await queryInterface.addIndex('verification_codes', 
       ['email', 'phone', 'type', 'verify_type', 'verified'], {
       name: 'unique_active_verification',
