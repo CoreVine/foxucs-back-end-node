@@ -46,11 +46,14 @@ const adminController = {
 
   async activity(req, res, next) {
     try {
-      const repo = new AdminRepository();
-      const admin = await repo.findById(req.adminId);
-      if (!admin) throw new NotFoundError('Admin not found');
+          const repo = new AdminRepository();
+          const adminIdParam = Number(req.params.id);
+          if (!adminIdParam) throw new BadRequestError('admin id is required');
+          const admin = await repo.findById(adminIdParam);
+          if (!admin) throw new NotFoundError('Admin not found');
 
-      const logs = await admin.getActivity_logs({ order: [['created_at', 'DESC']], limit: 100 });
+  // AdminActivityLog model doesn't use timestamps (created_at), so order by id instead
+  const logs = await admin.getActivity_logs({ order: [['id', 'DESC']], limit: 100 });
       return responseHandler.success(res, { logs });
     } catch (err) {
       next(err);

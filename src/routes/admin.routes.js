@@ -135,7 +135,7 @@ router.get(
 );
 // Protected admin endpoints
 router.get(
-	'/admin/activity',
+	'/admin/:id/activity',
 	adminAuth,
 	requireRole('super_admin'),
 	activityLogger('view_activity', 'activity'),
