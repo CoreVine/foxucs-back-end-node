@@ -200,6 +200,10 @@ const adminController = {
       // Log the update action (fire-and-forget)
       try {
         adminActivity.log({ admin_id: req.adminId, action: 'update', resource: 'admins', route: `/admin/${id}` });
+        // If password was changed, log a specific password_change action too (no sensitive data)
+        if (typeof password !== 'undefined' && password !== null) {
+          adminActivity.log({ admin_id: req.adminId, action: 'password_change', resource: 'admins', resource_id: id, route: `/admin/${id}` });
+        }
       } catch (e) {
         // ignore logging errors
       }

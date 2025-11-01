@@ -37,7 +37,6 @@ router.get('/profile', authMiddleware, profileController.getProfile);
 		// Accept multipart/form-data with single file field `profile_picture`
 		...uploadMiddlewares,
 		validate(profileSchema),
-		requireProfileFields(),
 		noRedundantProfileUpdate,
 		profileController.upsertProfile
 	);

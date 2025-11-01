@@ -49,7 +49,12 @@ const createAdminSchema = Yup.object().shape({
 const updateAdminSchema = Yup.object().shape({
   username: Yup.string().nullable(),
   email: Yup.string().email().nullable(),
-  password: Yup.string().min(6).nullable(),
+	password: Yup.string().min(6).nullable(),
+	confirm_password: Yup.string().nullable().when('password', {
+		is: (val) => typeof val !== 'undefined' && val !== null,
+		then: Yup.string().required('confirm_password is required when changing password').oneOf([Yup.ref('password')], 'Passwords must match'),
+		otherwise: Yup.string().nullable()
+	}),
   profile_picture_url: Yup.string().url().nullable(),
 	roleIds: Yup.array().of(Yup.number())
 		.nullable()

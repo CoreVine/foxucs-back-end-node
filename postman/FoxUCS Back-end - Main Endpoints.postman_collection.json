@@ -1,0 +1,116 @@
+{
+  "info": {
+	"_postman_id": "2dc0a37f-c0a0-44f6-b1b5-17bb8c0a3e30",
+	"name": "FoxUCS Back-end - Main Endpoints",
+	"description": "Collection covering auth, password reset, profile, admin, banners and faqs endpoints. Replace {{baseUrl}}, {{authToken}}, and {{adminToken}} with real values in your environment.",
+	"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+	"_exporter_id": "45131942"
+  },
+  "item": [
+	{
+	  "name": "Auth",
+	  "item": [
+		{
+		  "name": "Password Reset",
+		  "item": [
+			{
+			  "name": "Request Reset",
+			  "request": {
+				"method": "POST",
+				"header": [
+				  { "key": "Content-Type", "value": "application/json" }
+				],
+				"body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}" },
+				"url": { "raw": "{{baseUrl}}/password-reset/request", "host": ["{{baseUrl}}"], "path": ["password-reset", "request"] }
+			  },
+			  "response": []
+			},
+			{
+			  "name": "Confirm Reset",
+			  "request": {
+				"method": "POST",
+				"header": [ { "key": "Content-Type", "value": "application/json" } ],
+				"body": { "mode": "raw", "raw": "{\n  \"token\": \"<reset-token>\",\n  \"new_password\": \"newpassword\"\n}" },
+				"url": { "raw": "{{baseUrl}}/password-reset/confirm", "host": ["{{baseUrl}}"], "path": ["password-reset", "confirm"] }
+			  },
+			  "response": []
+			}
+		  ]
+		},
+		{
+		  "name": "register",
+		  "item": [
+			{
+			  "name": "email",
+			  "item": [
+				{
+				  "name": "1. Initiate Registration with Email",
+				  "request": {
+					"method": "POST",
+					"header": [ { "key": "Content-Type", "value": "application/json" } ],
+					"body": { "mode": "raw", "raw": "{\n    \"email\": \"test@example.com\"\n}" },
+					"url": { "raw": "{{baseUrl}}/auth/register/initiate", "host": ["{{baseUrl}}"], "path": ["auth", "register", "initiate"] }
+				  },
+				  "response": []
+				}
+			  ]
+			}
+		  ]
+		}
+	  ]
+	},
+	{
+	  "name": "Profile",
+	  "item": [
+		{
+		  "name": "Get Profile",
+		  "request": {
+			"method": "GET",
+			"header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+			"url": { "raw": "{{baseUrl}}/profile", "host": ["{{baseUrl}}"], "path": ["profile"] }
+		  },
+		  "response": []
+		}
+	  ]
+	},
+	{
+	  "name": "Admin",
+	  "item": [
+		{
+		  "name": "settings",
+		  "item": [
+			{
+			  "name": "Admin - Update (with optional profile picture)",
+			  "request": {
+				"method": "PUT",
+				"header": [ { "key": "Authorization", "value": "Bearer {{admin_token}}" } ],
+				"body": { "mode": "formdata", "formdata": [ { "key": "username", "value": "updatedadmin", "type": "text" }, { "key": "email", "value": "updated@example.com", "type": "text" }, { "key": "password", "value": "newpass", "type": "text" }, { "key": "confirm_password", "value": "newpass", "type": "text" }, { "key": "roleIds", "value": "[1]", "type": "text" }, { "key": "profile_picture", "type": "file" } ] },
+				"url": { "raw": "{{baseUrl}}/admin/:id", "host": ["{{baseUrl}}"], "path": ["admin", ":id"], "variable": [ { "key": "id" } ] }
+			  },
+			  "response": []
+			},
+			{ "name": "Admin - Activity", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{admin_token}}" } ], "url": { "raw": "{{baseUrl}}/admin/{{adminId}}/activity", "host": ["{{baseUrl}}"], "path": ["admin", "{{adminId}}", "activity"] } }, "response": [] }
+		  ]
+		}
+	  ]
+	},
+	{
+	  "name": "Banners",
+	  "item": [
+		{ "name": "Get Banners", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/banners", "host": ["{{baseUrl}}"], "path": ["banners"] } }, "response": [] }
+	  ]
+	},
+	{
+	  "name": "FAQs",
+	  "item": [
+		{ "name": "Get FAQs", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/faqs", "host": ["{{baseUrl}}"], "path": ["faqs"] } }, "response": [] }
+	  ]
+	}
+  ],
+  "variable": [
+	{ "key": "baseUrl", "value": "http://localhost:4000" },
+	{ "key": "authToken", "value": "" },
+	{ "key": "adminToken", "value": "" },
+	{ "key": "adminId", "value": "" }
+  ]
+}
